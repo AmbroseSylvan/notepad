@@ -41,15 +41,18 @@ import javax.swing.*;
 public class Workspace extends JPanel  implements ActionListener {
     
 	protected static JTextArea textArea;
-	protected static JTextField FlagField;
+	protected static JTextField flagField;
+	protected static JTextField flagField2;
 	JButton submitBttn = new JButton("Commit . . ."); 
     JButton saveBttn = new JButton("Save");
     JButton loadBttn = new JButton("Load");
-    JLabel FlagLabel = new JLabel ("Enter flag for this entry below");
+    JLabel FlagLabel = new JLabel ("Enter flags for this entry below");
 	String Schm = "Journal";
     String Text;
     String FlagName;
 	String FlagID;
+	String FlagName2;
+	String FlagID2;
     String Query;
     
     public Workspace() {
@@ -60,7 +63,8 @@ public class Workspace extends JPanel  implements ActionListener {
         textArea.setEditable(true);
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
-        FlagField = new JTextField(20);
+        flagField = new JTextField(20);
+        flagField2 = new JTextField(20);
         JScrollPane scrollPane = new JScrollPane(textArea);
     
         //setting up buttons
@@ -127,7 +131,15 @@ public class Workspace extends JPanel  implements ActionListener {
         h.gridheight = 1;
         h.gridy = 23;
         h.gridx = 0;
-        add(FlagField, h);
+        add(flagField, h);
+      
+        //Add FlagField2
+        GridBagConstraints i = new GridBagConstraints();
+        i.gridwidth = 5;
+        i.gridheight = 1;
+        i.gridy = 24;
+        i.gridx = 0;
+        add(flagField2, i);
         
     }
  
@@ -135,26 +147,33 @@ public class Workspace extends JPanel  implements ActionListener {
     public void actionPerformed(ActionEvent e)
     {
     	Text = textArea.getText();
+    	FlagName = flagField.getText();
+    	FlagName2 = flagField2.getText();
     	String FlagID;
+    	String FlagID2;
+    	
 
     	//different actions depending on which button is the source of the actionevent
     	if (e.getSource() == submitBttn)
     	{
     		//get the flag id from user input and reference to database
-    		FlagName = FlagField.getText();
     		FlagID = IdentifyFlag(FlagName);
     		System.out.println(FlagID);
-    		
-    		//test that id was returned
-        	System.out.println("this is the flag id " + FlagID);
+    		System.out.println("this is the flag id: " + FlagID);
         	
-        	//insert entry with flag ID in the test table
-        	Query = "INSERT INTO log (entry, flag) VALUES ('" + Text + "', " + FlagID + ")";
+    		FlagID2 = IdentifyFlag(FlagName2);
+    		System.out.println(FlagID2);
+    		System.out.println("this is the flag id: " + FlagID2);
+        
+    		//insert entry with flag name in the log table
+        	Query = "INSERT INTO log (entry, flag, flag2) VALUES ('" + Text + 
+        			"', '" + FlagName + "', '" + FlagName2 + "')";
         	SQLcommands.Insert(Schm, Query);
         	
     	} else if (e.getSource() == saveBttn)
     	{
-    		Query = "INSERT INTO workspacelog(entry) VALUES ('" + Text + "')";
+    		Query = "INSERT INTO workspacelog(entry, flag, flag2) VALUES ('" + Text + 
+    				"', '" + FlagName + ", '" + FlagName2 + "')";
         	SQLcommands.Insert(Schm, Query);
         	
     	} else if (e.getSource() == loadBttn)
@@ -162,41 +181,45 @@ public class Workspace extends JPanel  implements ActionListener {
     		textArea.setText(
     				SQLcommands.Select(Schm, "SELECT entry FROM workspaceLog WHERE "
     						+ "timestamp = (SELECT MAX(timestamp) FROM WorkspaceLog)"));
+    		flagField.setText(
+    				SQLcommands.Select(Schm, "SELECT flag FROM workspaceLog WHERE "
+    						+ "timestamp = (SELECT MAX(timestamp) FROM WorkspaceLog)"));
     	}
     }
     
     public String IdentifyFlag(String FlagName)
 	{
-		String flagID;
+		String Name;
 		
-		flagID = SQLcommands.Select
-						(Schm, "SELECT idflag FROM flag WHERE flag_name = '" + FlagName + "';");
+		Name = SQLcommands.Select
+						(Schm, "SELECT flag_name FROM flag WHERE flag_name = '" + FlagName + "';");
 		
-		if (flagID == null)
+		if (Name == null)
 		{
 			System.out.println("no match");
-			System.out.println(flagID);
+			System.out.println(Name);
 			SQLcommands.Insert(Schm, 
 					"INSERT INTO flag (flag_name) VALUES ('" + FlagName + "');");
-			flagID = SQLcommands.Select
-					(Schm, "SELECT idFlag FROM flag WHERE flag_name = '" 
+			Name = SQLcommands.Select
+					(Schm, "SELECT flag_name FROM flag WHERE flag_name = '" 
 							+ FlagName + "';");
-			if (flagID == null)
+			if (Name == null)
 			{
 				System.out.println("failed insert");
-				System.out.println(flagID);
+				System.out.println(Name);
 			} else 
 			{
-				return flagID;
+				return Name;
 			}
-			return flagID;
+			return Name;
 		} else 
 		{
 			System.out.println("match");
-			System.out.println(flagID);
-			return flagID;
+			System.out.println(Name);
+			return Name;
 		}
 	}
+    
     /**
      * Create the GUI and show it.  For thread safety,
      * this method should be invoked from the

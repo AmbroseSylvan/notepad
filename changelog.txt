@@ -1,0 +1,19 @@
+JOURNAL CHANGE LOG
+
+-Workspace() and the table workspaceLog now store and retrieve the flag field text when saving and loading workspace text. 
+
+-flagField is now loaded, edited, and saved in Reader().
+	-Column flag in table log now has VARCHAR() datatype. Stores same data as column flag_name in table flag. 
+	-column flag_name in table flag is now marked `unique`
+	-changed Workspace() to store flag_name during commit and not flag id. 
+	-changed Reader() to retrieve flag name from log table instead of looking in the flag table. 
+	-Changed Reader() to overwrite the flag column in the log table with a new text entry from the user. 
+	-Changed Workspace() and Reader() so that both display, load, save, and edit a second flag field. 
+
+-Created Reader.java
+	
+-Created Search.java
+
+-Created all required columns in tables 'flag' and 'log'
+
+---error in Search(). Array out of bounds. 

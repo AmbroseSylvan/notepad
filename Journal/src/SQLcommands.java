@@ -56,4 +56,21 @@ public class SQLcommands {
 
 	}
 
+	public static void Update(String Schema, String Text) {
+		String Query = Text;
+		
+		try 
+		{
+			Connection conn = Connect(Schema);
+			PreparedStatement preparedStmt = conn.prepareStatement(Query);
+			preparedStmt.execute();
+			conn.close();
+		} catch (Exception e)
+		{
+			System.err.println("Got an exception");
+			System.err.println(e.getMessage());
+		}
+		
+	}
+
 }
